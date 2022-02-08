@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MetalAPI", "MetalAPI\MetalAPI.csproj", "{8D3314AE-0AE5-45AE-89DF-B30E86C10DE9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetalScraper", "MetalScraper\MetalScraper.csproj", "{73C763AF-6D83-4DA9-A93D-A341254DC35C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8D3314AE-0AE5-45AE-89DF-B30E86C10DE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D3314AE-0AE5-45AE-89DF-B30E86C10DE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D3314AE-0AE5-45AE-89DF-B30E86C10DE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D3314AE-0AE5-45AE-89DF-B30E86C10DE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73C763AF-6D83-4DA9-A93D-A341254DC35C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73C763AF-6D83-4DA9-A93D-A341254DC35C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73C763AF-6D83-4DA9-A93D-A341254DC35C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73C763AF-6D83-4DA9-A93D-A341254DC35C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {150CD037-C1EF-4039-BD48-035BEC670FBC}
+	EndGlobalSection
+EndGlobal
