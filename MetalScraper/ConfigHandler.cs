@@ -12,9 +12,9 @@ namespace MetalScraper
             _configuration = configuration;
         }
 
-         public string GetBasicUrl()
+        public string GetSetting(string key)
         {
-            return _configuration.GetValue<string>("Config:BasicUrl");
+            return _configuration[$"Config:{key}"];
         }
     }
 }

@@ -2,6 +2,6 @@
 {
     public interface IConfigHandler
     {
-        public string GetBasicUrl();
+        public string GetSetting(string key);
     }
 }
