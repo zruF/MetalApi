@@ -1,6 +1,6 @@
-﻿using MetalScraper.Types;
+﻿using MetalModels.Types;
 
-namespace MetalScraper.Models
+namespace MetalModels.Models
 {
     public class Album
     {

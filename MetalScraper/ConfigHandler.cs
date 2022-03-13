@@ -12,7 +12,7 @@ namespace MetalScraper
             _configuration = configuration;
         }
 
-        public string GetSetting(string key)
+        public string GetConfig(string key)
         {
             return _configuration[$"Config:{key}"];
         }

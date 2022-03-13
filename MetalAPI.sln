@@ -5,7 +5,17 @@ VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MetalAPI", "MetalAPI\MetalAPI.csproj", "{8D3314AE-0AE5-45AE-89DF-B30E86C10DE9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetalScraper", "MetalScraper\MetalScraper.csproj", "{73C763AF-6D83-4DA9-A93D-A341254DC35C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MetalScraper", "MetalScraper\MetalScraper.csproj", "{73C763AF-6D83-4DA9-A93D-A341254DC35C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{DB2BDE29-921F-41B9-821C-F87240F4AEA5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MetalServices", "MetalServices\MetalServices.csproj", "{AB8A8E9F-20E8-4C1E-951E-30BBCA3524B1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Models", "Models", "{F7D00317-BDA4-4E67-9005-EC2D2F5E8CFB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MetalModels", "MetalModels\MetalModels.csproj", "{141FCE4A-4A09-4684-82EF-0986209D558C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared", "Shared\Shared.csproj", "{C98167B7-9E81-427C-BFAE-01E0565B01C4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,9 +31,25 @@ Global
 		{73C763AF-6D83-4DA9-A93D-A341254DC35C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{73C763AF-6D83-4DA9-A93D-A341254DC35C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{73C763AF-6D83-4DA9-A93D-A341254DC35C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB8A8E9F-20E8-4C1E-951E-30BBCA3524B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB8A8E9F-20E8-4C1E-951E-30BBCA3524B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB8A8E9F-20E8-4C1E-951E-30BBCA3524B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB8A8E9F-20E8-4C1E-951E-30BBCA3524B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{141FCE4A-4A09-4684-82EF-0986209D558C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{141FCE4A-4A09-4684-82EF-0986209D558C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{141FCE4A-4A09-4684-82EF-0986209D558C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{141FCE4A-4A09-4684-82EF-0986209D558C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C98167B7-9E81-427C-BFAE-01E0565B01C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C98167B7-9E81-427C-BFAE-01E0565B01C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C98167B7-9E81-427C-BFAE-01E0565B01C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C98167B7-9E81-427C-BFAE-01E0565B01C4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AB8A8E9F-20E8-4C1E-951E-30BBCA3524B1} = {DB2BDE29-921F-41B9-821C-F87240F4AEA5}
+		{141FCE4A-4A09-4684-82EF-0986209D558C} = {F7D00317-BDA4-4E67-9005-EC2D2F5E8CFB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {150CD037-C1EF-4039-BD48-035BEC670FBC}

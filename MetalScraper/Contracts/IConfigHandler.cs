@@ -2,6 +2,6 @@
 {
     public interface IConfigHandler
     {
-        public string GetSetting(string key);
+        public string GetConfig(string key);
     }
 }

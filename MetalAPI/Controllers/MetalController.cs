@@ -4,9 +4,10 @@ namespace MetalAPI.Controllers
 {
     public class MetalController : Controller
     {
-        public IActionResult Index()
+
+        public MetalController(IServiceProvider serviceProvider)
         {
-            return View();
+
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace MetalScraper.Models
+﻿namespace MetalModels.Models
 {
     public class Song
     {
