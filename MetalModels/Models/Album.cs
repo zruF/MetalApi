@@ -1,15 +1,18 @@
 ﻿using MetalModels.Types;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MetalModels.Models
 {
     public class Album
     {
-        public Guid Id { get; set; }
+        [Key]
+        public Guid AlbumId { get; set; }
         public string Name { get; set; }
-        public long BandId { get; set; }
+        [ForeignKey("Band")]
+        public Guid BandId { get; set; }
         public int ReleaseYear { get; set; }
-        public IEnumerable<Genre> Genres { get; set; }
-        public IEnumerable<Song> Songs { get; set; }
         public AlbumType AlbumType { get; set; }
+        public IEnumerable<Song> Songs { get; set; }
     }
 }

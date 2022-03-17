@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using MetalScraper.Contracts;
 using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
 
 var services = new ServiceCollection();
 ConfigureServices(services);
@@ -15,6 +16,5 @@ static void ConfigureServices(IServiceCollection services)
     services.AddSingleton(config);
     services.AddSingleton<IConfigHandler, ConfigHandler>();
     services.AddSingleton<Scraper, Scraper>();
-    //services.AddDbContext<ScraperDbContext>(
-    //    options => options.UseSqlServer("name=ConnectionStrings:DefaultConnection"));
+    services.AddDbContext<MetalDbContext>(options => options.UseSqlServer());
 }

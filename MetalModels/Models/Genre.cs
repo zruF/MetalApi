@@ -1,9 +1,15 @@
-﻿namespace MetalModels.Models
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace MetalModels.Models
 {
     public class Genre
     {
-        public int Id { get; set; }
+        [Key]
+        public Guid GenreId { get; set; }
         public string Name { get; set; }
-        public string Description { get; set; }
+        public IEnumerable<Band> Bands { get; set; }
+        [ForeignKey("GenreId")]
+        public virtual ICollection<BandGenres> BandGenres { get; set; }
     }
 }

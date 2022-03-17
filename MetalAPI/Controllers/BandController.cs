@@ -7,9 +7,9 @@ namespace MetalAPI.Controllers
         public BandController(IServiceProvider serviceProvider)
         {
             [HttpGet("{bandId}")]
-            public IActionResult GetBand(Guid)
+            public IActionResult GetBand(Guid bandId)
             {
-
+                return Ok();
             }
         }
     }
