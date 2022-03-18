@@ -13,9 +13,7 @@ namespace MetalModels.Models
         public int FoundingYear { get; set; }
         public bool IsActive { get; set; }
         public bool IsFavorite { get; set; }
-        public IEnumerable<Genre> Genres { get; set; }
         public IEnumerable<Album> Albums { get; set; }
-        [ForeignKey("BandId")]
-        public virtual ICollection<BandGenres> BandGenres { get; set; }
+        public virtual ICollection<BandGenre> BandGenres { get; set; }
     }
 }

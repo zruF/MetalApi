@@ -8,8 +8,6 @@ namespace MetalModels.Models
         [Key]
         public Guid GenreId { get; set; }
         public string Name { get; set; }
-        public IEnumerable<Band> Bands { get; set; }
-        [ForeignKey("GenreId")]
-        public virtual ICollection<BandGenres> BandGenres { get; set; }
+        public virtual ICollection<BandGenre> BandGenres { get; set; }
     }
 }

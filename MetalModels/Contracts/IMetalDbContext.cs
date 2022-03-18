@@ -1,7 +1,7 @@
 ﻿using MetalModels.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace MetalScraper.Contracts
+namespace MetalModels.Contracts
 {
     public interface IMetalDbContext
     {
@@ -9,5 +9,6 @@ namespace MetalScraper.Contracts
         DbSet<Album> Albums { get; set; }
         DbSet<Song> Songs { get; set; }
         DbSet<Genre> Genres { get; set; }
+        DbSet<BandGenre> BandGenres { get; set; }
     }
 }

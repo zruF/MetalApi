@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+using MetalModels;
 using MetalModels.Models;
 using MetalModels.Types;
 using MetalScraper.Contracts;
@@ -10,9 +11,9 @@ namespace MetalScraper
     public class Scraper
     {
         private IConfigHandler _config;
-        private IMetalDbContext _dbContext;
+        private MetalDbContext _dbContext;
 
-        public Scraper(IConfigHandler config, IMetalDbContext dbContext)
+        public Scraper(IConfigHandler config, MetalDbContext dbContext)
         {
             _config = config;
             _dbContext = dbContext;
@@ -24,12 +25,9 @@ namespace MetalScraper
             var maximumEntries = int.Parse(_config.GetConfig("MaximumEntries"));
             var threads = int.Parse(_config.GetConfig("Threads"));
 
-            var nodes = new List<HtmlNode>();
-
-            var bands = new List<Band>();
-
             for (var currentStack = 0; currentStack < maximumEntries;)
             {
+                var nodes = new List<HtmlNode>();
                 var tasks = new List<Task>();
                 for(var i = 0; i < threads; i++, currentStack+=stackSize)
                 {
@@ -43,11 +41,11 @@ namespace MetalScraper
                 }
 
                 Task.WaitAll(tasks.ToArray());
+                await ScrapeBandsAsync(nodes);
             }
-            bands.AddRange(await ScrapeBands(nodes));
         }
 
-        private async Task<IEnumerable<Band>> ScrapeBands(List<HtmlNode> bandEntries)
+        private async Task ScrapeBandsAsync(List<HtmlNode> bandEntries)
         {
             var threads = int.Parse(_config.GetConfig("Threads"));
 
@@ -55,47 +53,53 @@ namespace MetalScraper
 
             var bands = new List<Band>();
 
-            for (var i = 0; i <= bandEntries.Count;)
+            for (var i = 0; i <= bandEntries.Count; i++)
             {
-                for (var j = 0; j < threads; j++, i++)
+                var bandUrl = bandEntries[i].GetAttributeValue("href", "NoUrlFound").Replace("\\", "").Replace("\"", "");
+                var url = bandEntries[i].Attributes.FirstOrDefault().Value.Replace("\\","").Replace("\"", "");
+                var bandId = long.Parse(url.Split("/").Last());
+                var albumNodes = await GetAlbumNodesAsync(bandId);
+                var bandGuid = Guid.NewGuid();
+                var albums = await ScrapeAlbumsAsync(bandGuid, albumNodes);
+
+                var existingBand = await _dbContext.Bands.FirstOrDefaultAsync(b => b.ShortId == bandId);
+
+                if(existingBand != null)
                 {
-                    var bandUrl = bandEntries[i].GetAttributeValue("href", "NoUrlFound").Replace("\\", "").Replace("\"", "");
-                    var url = bandEntries[i].Attributes.FirstOrDefault().Value.Replace("\\","").Replace("\"", "");
-                    var bandId = long.Parse(url.Split("/").Last());
-                    var albumNodes = await GetAlbumNodesAsync(bandId);
-                    var bandGuid = Guid.NewGuid();
-                    var albums = await ScrapeAlbumsAsync(bandGuid, albumNodes);
-
-                    var existingBand = await _dbContext.Bands.FirstOrDefaultAsync(b => b.ShortId == bandId);
-
-                    if(existingBand != null)
+                    if(_dbContext.Albums.Where(a => a.BandId == existingBand.BandId).Count() != albums.Count())
                     {
-                        if(_dbContext.Albums.Where(a => a.BandId == existingBand.BandId).Count() >= albums.Count())
-                        {
-                            continue;
-                        }
+                        continue;
                     }
-                    
-                    var bandInfos = (await new HtmlWeb().LoadFromWebAsync(bandUrl)).DocumentNode.SelectNodes("//div[@id='band_stats']//dd");
-                    var bandName = bandEntries[i].InnerText;
-                    
-                    var genres = await ScrapeGenresAsync(bandInfos[4].InnerText);
-                    
-                    lock (bands)
-                        bands.Add(new Band
-                        {
-                            BandId = Guid.NewGuid(),
-                            Country = bandInfos[1].InnerText,
-                            IsActive = bandInfos[2].InnerText.Equals("Active"),
-                            FoundingYear = int.Parse(bandInfos[3].InnerText == "N/A" ? "0" : bandInfos[3].InnerText),
-                            Name = bandName,
-                            Genres = genres,
-                            Albums = albums
-                        });
                 }
-            }
+                    
+                var bandInfos = (await new HtmlWeb().LoadFromWebAsync(bandUrl)).DocumentNode.SelectNodes("//div[@id='band_stats']//dd");
+                var bandName = bandEntries[i].InnerText;
+                    
+                var genres = await ScrapeGenresAsync(bandInfos[4].InnerText);
+                    
+                var band = new Band
+                {
+                    BandId = bandGuid,
+                    ShortId = bandId,
+                    Country = bandInfos[1].InnerText,
+                    IsActive = bandInfos[2].InnerText.Equals("Active"),
+                    FoundingYear = int.Parse(bandInfos[3].InnerText == "N/A" ? "0" : bandInfos[3].InnerText),
+                    Name = bandName,
+                    Albums = albums
+                };
 
-            return bands;
+                var bandGenres = genres.Select(g => new BandGenre
+                {
+                    BandId = band.BandId,
+                    GenreId = g.GenreId,
+                    Band = band,
+                    Genre = g
+                });
+
+                await _dbContext.Bands.AddAsync(band);
+                await _dbContext.BandGenres.AddRangeAsync(bandGenres);
+                await _dbContext.SaveChangesAsync();
+            }
         }
 
         private async Task<IEnumerable<Album>> ScrapeAlbumsAsync(Guid bandId, IEnumerable<HtmlNode> albumEntries)
@@ -109,14 +113,15 @@ namespace MetalScraper
                 var childs = albumList[i].SelectNodes("td");
                 var albumName = childs[0].InnerText;
                 var albumId = Guid.NewGuid();
-                
+                Enum.TryParse(typeof(AlbumType), childs[1].InnerText.Replace("-", "").Replace(" ", "").Trim(), out var albumType);
+
                 albums.Add(new Album
                 {
                     AlbumId = albumId,
                     BandId = bandId,
                     Name = albumName,
                     Songs = await ScrapeSongsAsync(albumId, childs[0].LastChild.GetAttributeValue("href", "UrlNotFound")),
-                    AlbumType = (AlbumType)Enum.Parse(typeof(AlbumType), childs[1].InnerText.Replace("-", "").Replace(" ", "").Trim()),
+                    AlbumType = albumType == null ? AlbumType.None : (AlbumType)albumType,
                     ReleaseYear = int.Parse(childs[2].InnerText == "N/A" ? "0" : childs[2].InnerText),
                 });
             }
@@ -132,7 +137,7 @@ namespace MetalScraper
             foreach(var songNode in songNodes)
             {
                 var childs = songNode.SelectNodes("td");
-                if (childs.Count() != 4)
+                if (childs.Count != 4)
                 {
                     continue;
                 }
@@ -141,8 +146,8 @@ namespace MetalScraper
                     SongId = Guid.NewGuid(),
                     AlbumId = albumId,
                     Length = childs[2].InnerText,
-                    Name = childs[1].InnerText
-                });
+                    Name = childs[1].InnerText.Replace("\n", "")
+                }); ;
             }
 
             return songs;
@@ -168,12 +173,11 @@ namespace MetalScraper
                         var suffix = genresSplitted
                             .Skip(i + 1)
                             .Take(genresSplitted.Length)
-                            .FirstOrDefault(g => new List<string> { "Metal", "Rock" }
-                            .Any(s => g.Contains(s)))
+                            .FirstOrDefault(g => new List<string> { "Metal", "Rock" }.Any(s => g.Contains(s)))?
                             .Split(' ')
                             .Last();
 
-                        genreName = genresSplitted[i] + " " + suffix;
+                        genreName = (genresSplitted[i] + " " + suffix??"").Trim();
                     }
 
                     var existingGenre = await _dbContext.Genres.FirstOrDefaultAsync(g => g.Name == genreName);
@@ -193,7 +197,7 @@ namespace MetalScraper
                 }
             }
 
-            return genres;
+            return genres.Distinct();
         }
 
         private async Task<IEnumerable<HtmlNode>> GetAlbumNodesAsync(long bandId)
