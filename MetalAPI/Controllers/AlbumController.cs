@@ -16,7 +16,7 @@ namespace MetalAPI.Controllers
         public async Task<IActionResult> GetAlbum(Guid albumId)
         {
             var album = await _albumService.GetAlbumAsync(albumId);
-            return (IActionResult)Ok(album);
+            return Ok(album);
         }
     }
 }
