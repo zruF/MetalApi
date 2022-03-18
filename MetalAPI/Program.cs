@@ -1,6 +1,9 @@
+using AutoMapper;
+using MetalAPI;
 using MetalModels;
 using MetalServices;
 using MetalServices.Contracts;
+using MetalServices.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +23,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<ExceptionMiddleware>();
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
@@ -34,4 +39,11 @@ static void ConfigureServices(IServiceCollection services)
     services.AddSingleton(config);
     services.AddDbContext<MetalDbContext>();
     services.AddTransient<IBandService, BandService>();
+    services.AddTransient<IAlbumService, AlbumService>();
+    var mapperConfig = new MapperConfiguration(mc =>
+    {
+        mc.AddProfile(new MetalProfile());
+    });
+    IMapper mapper = mapperConfig.CreateMapper();
+    services.AddSingleton(mapper);
 }

@@ -1,4 +1,6 @@
-﻿namespace MetalModels.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace MetalModels.Models
 {
     public class BandGenre
     {

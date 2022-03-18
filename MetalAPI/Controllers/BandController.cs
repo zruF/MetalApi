@@ -1,9 +1,11 @@
 ﻿using MetalServices.Contracts;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Dtos.Responses;
 
 namespace MetalAPI.Controllers
 {
-    public class BandController : Controller
+    [Route("[controller]")]
+    public class BandController : BaseController
     {
         private readonly IBandService _bandService;
 
@@ -13,7 +15,7 @@ namespace MetalAPI.Controllers
         }
 
         [HttpGet("{bandId}")]
-        [ExceptionHandling]
+        [ProducesResponseType(typeof(BandResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetBand(Guid bandId)
         {
             var band = await _bandService.GetBandAsync(bandId);

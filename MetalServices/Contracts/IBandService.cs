@@ -1,9 +1,9 @@
-﻿using MetalModels.Models;
+﻿using Shared.Dtos.Responses;
 
 namespace MetalServices.Contracts
 {
     public interface IBandService
     {
-        public Task<Band> GetBandAsync(Guid bandId);
+        public Task<BandResponse> GetBandAsync(Guid bandId);
     }
 }

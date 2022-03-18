@@ -1,6 +1,6 @@
 ﻿namespace MetalAPI.Controllers
 {
-    public class SongController
+    public class SongController : BaseController
     {
     }
 }

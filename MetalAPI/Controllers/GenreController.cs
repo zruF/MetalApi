@@ -1,6 +1,6 @@
 ﻿namespace MetalAPI.Controllers
 {
-    public class GenreController
+    public class GenreController : BaseController
     {
     }
 }
