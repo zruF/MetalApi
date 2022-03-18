@@ -23,81 +23,82 @@ namespace MetalScraper
         {
             var stackSize = int.Parse(_config.GetConfig("EntryStackSize"));
             var maximumEntries = int.Parse(_config.GetConfig("MaximumEntries"));
-            var threads = int.Parse(_config.GetConfig("Threads"));
 
-            for (var currentStack = 0; currentStack < maximumEntries;)
+            for (var currentStack = 0; currentStack < maximumEntries; currentStack += stackSize)
             {
-                var nodes = new List<HtmlNode>();
-                var tasks = new List<Task>();
-                for(var i = 0; i < threads; i++, currentStack+=stackSize)
-                {
-                    tasks.Add(Task.Run(async () => {
-                        var url = $"{_config.GetConfig("BasicUrl")}{string.Format(_config.GetConfig("Query"), currentStack, maximumEntries)}";
-                        var rawCode = await new HtmlWeb().LoadFromWebAsync(url);
-                        lock(nodes)
-                            nodes.AddRange(rawCode.DocumentNode.SelectNodes("//a[@href]").ToList());
-                        Console.WriteLine("Scraping Web - " + nodes.Count);
-                    }));
-                }
-
-                Task.WaitAll(tasks.ToArray());
-                await ScrapeBandsAsync(nodes);
+                var url = $"{_config.GetConfig("BasicUrl")}{string.Format(_config.GetConfig("Query"), currentStack, maximumEntries)}";
+                var rawCode = await new HtmlWeb().LoadFromWebAsync(url);
+                await ScrapeBandsAsync(rawCode.DocumentNode.SelectNodes("//a[@href]").ToList());
             }
         }
 
         private async Task ScrapeBandsAsync(List<HtmlNode> bandEntries)
         {
-            var threads = int.Parse(_config.GetConfig("Threads"));
-
             var nodes = new List<HtmlNode>();
 
             var bands = new List<Band>();
 
-            for (var i = 0; i <= bandEntries.Count; i++)
+            for (var i = 0; i < bandEntries.Count; i++)
             {
                 var bandUrl = bandEntries[i].GetAttributeValue("href", "NoUrlFound").Replace("\\", "").Replace("\"", "");
                 var url = bandEntries[i].Attributes.FirstOrDefault().Value.Replace("\\","").Replace("\"", "");
+                var bandName = bandEntries[i].InnerText;
                 var bandId = long.Parse(url.Split("/").Last());
                 var albumNodes = await GetAlbumNodesAsync(bandId);
-                var bandGuid = Guid.NewGuid();
-                var albums = await ScrapeAlbumsAsync(bandGuid, albumNodes);
 
-                var existingBand = await _dbContext.Bands.FirstOrDefaultAsync(b => b.ShortId == bandId);
+                var existingBand = await _dbContext.Bands
+                    .Include(b => b.Albums)
+                    .FirstOrDefaultAsync(b => b.ShortId == bandId);
+                var bandGuid = existingBand?.BandId ?? Guid.NewGuid();
+                
+                if(albumNodes is null)
+                {
+                    continue;
+                }
+
+                var albums = await ScrapeAlbumsAsync(bandGuid, albumNodes);
 
                 if(existingBand != null)
                 {
-                    if(_dbContext.Albums.Where(a => a.BandId == existingBand.BandId).Count() != albums.Count())
+                    if(albums.Count() > existingBand.Albums.Count())
+                    {
+                        albums.Where(a => !existingBand.Albums.Any(b => b.Name != a.Name));
+                        await _dbContext.Albums.AddRangeAsync(albums);
+                    }
+                    else
                     {
                         continue;
                     }
                 }
-                    
-                var bandInfos = (await new HtmlWeb().LoadFromWebAsync(bandUrl)).DocumentNode.SelectNodes("//div[@id='band_stats']//dd");
-                var bandName = bandEntries[i].InnerText;
-                    
-                var genres = await ScrapeGenresAsync(bandInfos[4].InnerText);
-                    
-                var band = new Band
+                else
                 {
-                    BandId = bandGuid,
-                    ShortId = bandId,
-                    Country = bandInfos[1].InnerText,
-                    IsActive = bandInfos[2].InnerText.Equals("Active"),
-                    FoundingYear = int.Parse(bandInfos[3].InnerText == "N/A" ? "0" : bandInfos[3].InnerText),
-                    Name = bandName,
-                    Albums = albums
-                };
+                    var bandInfos = (await new HtmlWeb().LoadFromWebAsync(bandUrl)).DocumentNode.SelectNodes("//div[@id='band_stats']//dd");
+                    var genres = await ScrapeGenresAsync(bandInfos[4].InnerText);
 
-                var bandGenres = genres.Select(g => new BandGenre
-                {
-                    BandId = band.BandId,
-                    GenreId = g.GenreId,
-                    Band = band,
-                    Genre = g
-                });
+                    var band = new Band
+                    {
+                        BandId = bandGuid,
+                        ShortId = bandId,
+                        Country = bandInfos[1].InnerText,
+                        IsActive = bandInfos[2].InnerText.Equals("Active"),
+                        FoundingYear = int.Parse(bandInfos[3].InnerText == "N/A" ? "0" : bandInfos[3].InnerText),
+                        Name = bandName,
+                        Albums = albums
+                    };
 
-                await _dbContext.Bands.AddAsync(band);
-                await _dbContext.BandGenres.AddRangeAsync(bandGenres);
+                    var bandGenres = genres.Select(g => new BandGenre
+                    {
+                        BandId = band.BandId,
+                        GenreId = g.GenreId,
+                        Band = band,
+                        Genre = g
+                    });
+
+                    await _dbContext.Bands.AddAsync(band);
+                    await _dbContext.BandGenres.AddRangeAsync(bandGenres);
+                }
+                    
+                
                 await _dbContext.SaveChangesAsync();
             }
         }
@@ -204,9 +205,16 @@ namespace MetalScraper
         {
             var albumUrl = string.Format(_config.GetConfig("AlbumUrl"), bandId);
             var rawCode = await new HtmlWeb().LoadFromWebAsync(albumUrl);
-            var tableNodes = rawCode.DocumentNode.SelectNodes("//table[@class='display discog']//tbody[1]//tr").ToList();
+            var tableNodes = rawCode.DocumentNode.SelectNodes("//table[@class='display discog']//tbody[1]//tr");
+            if(tableNodes.Count == 1 && tableNodes.FirstOrDefault().InnerText.Contains("Nothing entered yet"))
+            {
+                return null;
+            }
+            var albumNodes = tableNodes
+                .Where(n => Enum.GetNames(typeof(AlbumType)).Contains(n.SelectNodes("td")[1]?.InnerText.Replace("-", "").Replace(" ", "").Trim()))
+                .ToList();
 
-            return tableNodes;
+            return albumNodes;
         }
     }
 }

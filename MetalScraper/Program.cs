@@ -13,7 +13,6 @@ await services.BuildServiceProvider()
 static void ConfigureServices(IServiceCollection services)
 {
     IConfiguration config = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
-    services
     services.AddSingleton(config);
     services.AddSingleton<IConfigHandler, ConfigHandler>();
     services.AddSingleton<Scraper, Scraper>();
