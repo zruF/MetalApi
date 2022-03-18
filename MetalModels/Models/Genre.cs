@@ -1,9 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using MetalModels.Contracts;
+using System.ComponentModel.DataAnnotations;
 
 namespace MetalModels.Models
 {
-    public class Genre
+    public class Genre : IEntity
     {
         [Key]
         public Guid GenreId { get; set; }

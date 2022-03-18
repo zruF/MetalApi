@@ -1,10 +1,11 @@
-﻿using MetalModels.Types;
+﻿using MetalModels.Contracts;
+using MetalModels.Types;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MetalModels.Models
 {
-    public class Album
+    public class Album : IEntity
     {
         [Key]
         public Guid AlbumId { get; set; }

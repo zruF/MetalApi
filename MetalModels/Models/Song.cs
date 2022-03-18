@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using MetalModels.Contracts;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MetalModels.Models
 {
-    public class Song
+    public class Song : IEntity
     {
         [Key]
         public Guid SongId { get; set; }

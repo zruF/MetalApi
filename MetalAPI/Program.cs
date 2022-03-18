@@ -10,13 +10,11 @@ var builder = WebApplication.CreateBuilder(args);
 ConfigureServices(builder.Services);
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -26,9 +24,7 @@ if (app.Environment.IsDevelopment())
 app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
@@ -40,6 +36,7 @@ static void ConfigureServices(IServiceCollection services)
     services.AddDbContext<MetalDbContext>();
     services.AddTransient<IBandService, BandService>();
     services.AddTransient<IAlbumService, AlbumService>();
+    services.AddTransient<ISearchService, SearchService>();
     var mapperConfig = new MapperConfiguration(mc =>
     {
         mc.AddProfile(new MetalProfile());
