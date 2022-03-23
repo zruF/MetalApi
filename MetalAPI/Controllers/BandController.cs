@@ -1,6 +1,8 @@
 ﻿using MetalServices.Contracts;
 using Microsoft.AspNetCore.Mvc;
+using Shared.Dtos.Requests;
 using Shared.Dtos.Responses;
+using Shared.Dtos.Responses.Pagination;
 
 namespace MetalAPI.Controllers
 {
@@ -36,6 +38,22 @@ namespace MetalAPI.Controllers
         {
             var band = await _bandService.SetUnfavoriteAsync(bandId);
             return Ok(band);
+        }
+
+        [HttpGet("Random")]
+        [ProducesResponseType(typeof(BandResponse), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetRandom()
+        {
+            var band = await _bandService.GetRandomAsync();
+            return Ok(band);
+        }
+
+        [HttpGet("Genre")]
+        [ProducesResponseType(typeof(PaginationResponse<BandResponse>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetBandsByGenre(PaginationRequest request)
+        {
+            var bands = await _bandService.GetBandsByGenre(request);
+            return Ok(bands);
         }
     }
 }

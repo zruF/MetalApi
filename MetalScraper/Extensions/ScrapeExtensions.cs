@@ -14,9 +14,9 @@ namespace MetalScraper.Extensions
             var splitted = dateString.Split(" ");
 
             var month =
-                new List<string>
+                (new List<string>
                 { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" }
-                .IndexOf(splitted.First()) + 1;
+                .IndexOf(splitted.First()) + 1).ToString();
 
             var year = splitted.Last();
 
@@ -25,6 +25,11 @@ namespace MetalScraper.Extensions
             if(day.Length == 1)
             {
                 day = "0" + day;
+            }
+
+            if (month.Length == 1)
+            {
+                month = "0" + month;
             }
 
             return $"{month}/{day}/{year}";

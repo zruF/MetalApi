@@ -8,7 +8,7 @@ namespace MetalModels.Models
         [Key]
         public Guid GenreId { get; set; }
         public string Name { get; set; }
-        public virtual ICollection<GenreFavorites> Favorites { get; set; }
-        public virtual ICollection<BandGenre> BandGenres { get; set; }
+        public ICollection<GenreFavorites> Favorites { get; set; }
+        public ICollection<BandGenre> BandGenres { get; set; }
     }
 }

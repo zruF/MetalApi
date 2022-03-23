@@ -6,6 +6,5 @@ namespace Shared.Dtos.Requests
     {
         public string Name { get; set; }
         public EntityType EntityType { get; set; }
-        public bool? IsFavorite { get; set; }
     }
 }

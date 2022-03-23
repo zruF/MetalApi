@@ -5,6 +5,6 @@
         All = 0,
         Band = 1,
         Album = 2,
-        Song = 3,
+        Genre = 3,
     }
 }

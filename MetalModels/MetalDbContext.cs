@@ -20,12 +20,13 @@ namespace MetalModels
             /*
              * Server=tcp:metal-database.database.windows.net,1433;Initial Catalog=MetalDatabase;Persist Security Info=False;User ID=metal-db-user;Password=b4jn0vJXON1my4XU;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
              * */
-            optionsBuilder.UseSqlServer("Server=tcp:metal-database.database.windows.net,1433;Initial Catalog=MetalDatabase;Persist Security Info=False;User ID=metal-db-user;Password=b4jn0vJXON1my4XU;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
+            optionsBuilder.UseSqlServer(_connectionString);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Band>().HasMany(e => e.Albums).WithOne().HasForeignKey(a => a.BandId);
+            modelBuilder.Entity<Band>().HasMany(e => e.Albums).WithOne(a => a.Band).HasForeignKey(a => a.BandId);
+            modelBuilder.Entity<Album>().HasOne(e => e.Band).WithMany().HasForeignKey(a => a.AlbumId);
             modelBuilder.Entity<BandGenre>().HasKey(e => new { e.BandId, e.GenreId });
             modelBuilder.Entity<BandGenre>().HasOne(bg => bg.Band).WithMany(b => b.BandGenres).HasForeignKey(bg => bg.GenreId);
             modelBuilder.Entity<BandGenre>().HasOne(bg => bg.Genre).WithMany(b => b.BandGenres).HasForeignKey(bg => bg.BandId);

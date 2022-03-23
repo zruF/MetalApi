@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MetalModels;
 using MetalModels.Contracts;
+using MetalModels.Models;
 using MetalServices.Contracts;
 using MetalServices.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +25,7 @@ namespace MetalServices
         {
             var entities = new List<SearchResponse>();
 
-            IEnumerable<IEntity> bands, albums, songs;
+            IEnumerable<IEntity> bands, albums, genres;
 
             if(filter.EntityType == MetalModels.Types.EntityType.All || filter.EntityType == MetalModels.Types.EntityType.Band)
             {
@@ -35,6 +36,12 @@ namespace MetalServices
             {
                 albums = await _dbContext.Albums.AsNoTracking().SetQueryFilter(filter).ToListAsync();
                 entities.AddRange(_mapper.Map<IEnumerable<SearchResponse>>(albums));
+            }
+            if (filter.EntityType == MetalModels.Types.EntityType.Genre)
+            {
+                genres = await _dbContext.Genres.Include(g => g.BandGenres).AsNoTracking().SetQueryFilter(filter).ToListAsync();
+                var ordered = genres.Cast<Genre>().OrderByDescending(g => g.BandGenres.Count);
+                entities.AddRange(_mapper.Map<IEnumerable<SearchResponse>>(ordered));
             }
 
             return entities;

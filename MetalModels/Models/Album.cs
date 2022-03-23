@@ -15,5 +15,6 @@ namespace MetalModels.Models
         public string ReleaseDate { get; set; }
         public string ImgUrl { get; set; }
         public AlbumType AlbumType { get; set; }
+        public virtual Band Band { get; set; }
     }
 }

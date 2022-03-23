@@ -37,6 +37,7 @@ static void ConfigureServices(IServiceCollection services)
     services.AddSingleton(new MetalDbContext(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString));
     services.AddTransient<IBandService, BandService>();
     services.AddTransient<IAlbumService, AlbumService>();
+    services.AddTransient<IGenreService, GenreService>();
     services.AddTransient<ISearchService, SearchService>();
     var mapperConfig = new MapperConfiguration(mc =>
     {

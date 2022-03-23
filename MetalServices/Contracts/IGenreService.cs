@@ -2,5 +2,6 @@
 {
     public interface IGenreService
     {
+        Task<IEnumerable<string>> GetCommonGenres();
     }
 }

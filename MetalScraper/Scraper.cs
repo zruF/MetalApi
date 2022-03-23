@@ -93,7 +93,7 @@ namespace MetalScraper
                         FoundingYear = int.Parse(bandInfos[3].InnerText == "N/A" ? "0" : bandInfos[3].InnerText),
                         Name = bandName,
                         ImgUrl = imgUrl,
-                        Albums = albums
+                        Albums = albums.ToList()
                     };
 
                     var bandGenres = genres.Select(g => new BandGenre
