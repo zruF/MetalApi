@@ -17,7 +17,6 @@ namespace MetalServices
         public async Task<Album> GetAlbumAsync(Guid albumId)
         {
             var album = await _dbContext.Albums
-                .Include(a => a.Songs)
                 .FirstOrDefaultAsync(b => b.AlbumId == albumId);
 
             if (album is null)

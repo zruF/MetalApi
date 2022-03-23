@@ -6,8 +6,6 @@
         Fulllength = 1,
         Demo = 2,
         EP = 3,
-        Compilation = 4,
-        Livealbum = 5,
-        Collaboration = 6
+        Livealbum = 4,
     }
 }

@@ -3,6 +3,7 @@ using MetalModels;
 using MetalModels.Models;
 using MetalModels.Types;
 using MetalScraper.Contracts;
+using MetalScraper.Extensions;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 
@@ -13,6 +14,8 @@ namespace MetalScraper
         private IConfigHandler _config;
         private MetalDbContext _dbContext;
 
+        private string[] albumTypes;
+
         public Scraper(IConfigHandler config, MetalDbContext dbContext)
         {
             _config = config;
@@ -21,12 +24,16 @@ namespace MetalScraper
 
         public async Task ProcessAsync()
         {
+            await InitializeAsync();
+
             var stackSize = int.Parse(_config.GetConfig("EntryStackSize"));
             var maximumEntries = int.Parse(_config.GetConfig("MaximumEntries"));
+            var (basicUrl, query) = (_config.GetConfig("BasicUrl"), _config.GetConfig("Query"));
+            var startEntry = int.Parse(_config.GetConfig("StartEntry"));
 
-            for (var currentStack = 0; currentStack < maximumEntries; currentStack += stackSize)
+            for (var currentStack = startEntry; currentStack < maximumEntries; currentStack += stackSize)
             {
-                var url = $"{_config.GetConfig("BasicUrl")}{string.Format(_config.GetConfig("Query"), currentStack, maximumEntries)}";
+                var url = $"{basicUrl}{string.Format(query, currentStack, maximumEntries)}";
                 var rawCode = await new HtmlWeb().LoadFromWebAsync(url);
                 await ScrapeBandsAsync(rawCode.DocumentNode.SelectNodes("//a[@href]").ToList());
             }
@@ -43,7 +50,7 @@ namespace MetalScraper
                 var bandUrl = bandEntries[i].GetAttributeValue("href", "NoUrlFound").Replace("\\", "").Replace("\"", "");
                 var url = bandEntries[i].Attributes.FirstOrDefault().Value.Replace("\\","").Replace("\"", "");
                 var bandName = bandEntries[i].InnerText;
-                var bandId = long.Parse(url.Split("/").Last());
+                var bandId = url.Split("/").Last();
                 var albumNodes = await GetAlbumNodesAsync(bandId);
 
                 var existingBand = await _dbContext.Bands
@@ -62,7 +69,7 @@ namespace MetalScraper
                 {
                     if(albums.Count() > existingBand.Albums.Count())
                     {
-                        albums.Where(a => !existingBand.Albums.Any(b => b.Name != a.Name));
+                        albums = albums.Where(a => !existingBand.Albums.Any(b => b.Name != a.Name));
                         await _dbContext.Albums.AddRangeAsync(albums);
                     }
                     else
@@ -72,7 +79,9 @@ namespace MetalScraper
                 }
                 else
                 {
-                    var bandInfos = (await new HtmlWeb().LoadFromWebAsync(bandUrl)).DocumentNode.SelectNodes("//div[@id='band_stats']//dd");
+                    var site = await new HtmlWeb().LoadFromWebAsync(bandUrl);
+                    var bandInfos = site.DocumentNode.SelectNodes("//div[@id='band_stats']//dd");
+                    var imgUrl = site.DocumentNode.SelectSingleNode("//a[@id='photo']")?.GetAttributeValue("href", "N/A");
                     var genres = await ScrapeGenresAsync(bandInfos[4].InnerText);
 
                     var band = new Band
@@ -83,6 +92,7 @@ namespace MetalScraper
                         IsActive = bandInfos[2].InnerText.Equals("Active"),
                         FoundingYear = int.Parse(bandInfos[3].InnerText == "N/A" ? "0" : bandInfos[3].InnerText),
                         Name = bandName,
+                        ImgUrl = imgUrl,
                         Albums = albums
                     };
 
@@ -98,7 +108,6 @@ namespace MetalScraper
                     await _dbContext.BandGenres.AddRangeAsync(bandGenres);
                 }
                     
-                
                 await _dbContext.SaveChangesAsync();
             }
         }
@@ -113,45 +122,29 @@ namespace MetalScraper
             {
                 var childs = albumList[i].SelectNodes("td");
                 var albumName = childs[0].InnerText;
+                var albumUrl = childs[0].ChildNodes[0].GetAttributeValue("href", null);
+                string imgUrl = null;
+                var site = await new HtmlWeb().LoadFromWebAsync(albumUrl);
+                if (albumUrl != null)
+                {
+                    imgUrl = site.DocumentNode.SelectSingleNode("//a[@id='cover']")?.GetAttributeValue("href", "N/A");
+                }
                 var albumId = Guid.NewGuid();
-                Enum.TryParse(typeof(AlbumType), childs[1].InnerText.Replace("-", "").Replace(" ", "").Trim(), out var albumType);
+
+                var albumInfos = site.DocumentNode.SelectNodes("//div[@id='album_info']//dd");
 
                 albums.Add(new Album
                 {
                     AlbumId = albumId,
                     BandId = bandId,
                     Name = albumName,
-                    Songs = await ScrapeSongsAsync(albumId, childs[0].LastChild.GetAttributeValue("href", "UrlNotFound")),
-                    AlbumType = albumType == null ? AlbumType.None : (AlbumType)albumType,
-                    ReleaseYear = int.Parse(childs[2].InnerText == "N/A" ? "0" : childs[2].InnerText),
-                });
-            }
-
-            return albums;
-        }
-
-        private async Task<IEnumerable<Song>> ScrapeSongsAsync(Guid albumId, string albumUrl)
-        {
-            var songs = new List<Song>();
-            var songNodes = (await new HtmlWeb().LoadFromWebAsync(albumUrl)).DocumentNode.SelectNodes("//table[@class='display table_lyrics']//tr").ToList();
-            
-            foreach(var songNode in songNodes)
-            {
-                var childs = songNode.SelectNodes("td");
-                if (childs.Count != 4)
-                {
-                    continue;
-                }
-                songs.Add(new Song
-                {
-                    SongId = Guid.NewGuid(),
-                    AlbumId = albumId,
-                    Length = childs[2].InnerText,
-                    Name = childs[1].InnerText.Replace("\n", "")
+                    AlbumType = (AlbumType)Enum.Parse(typeof(AlbumType), childs[1].InnerText.Replace("-", "").Replace(" ", "").Trim()),
+                    ReleaseDate = albumInfos[1].InnerText.ParseDate(),
+                    ImgUrl = imgUrl,
                 }); ;
             }
 
-            return songs;
+            return albums;
         }
 
         private async Task<IEnumerable<Genre>> ScrapeGenresAsync(string genreString)
@@ -164,10 +157,10 @@ namespace MetalScraper
 
             foreach(var genre in genreList)
             {
-                var genresSplitted = Regex.Replace(genre, @"\(.*\)", "").Trim().Split('/');
+                var genresSplitted = Regex.Replace(genre, @"\(.*\)", "").Trim().Split(new char[] { '/' , ',' });
                 for(var i = 0; i < genresSplitted.Length; i++)
                 {
-                    var genreName = genresSplitted[i];
+                    var genreName = genresSplitted[i].Trim();
                     if (suffixList.All(s => !genresSplitted[i].Contains(s)))
                     {
                         //get next Suffix
@@ -201,7 +194,7 @@ namespace MetalScraper
             return genres.Distinct();
         }
 
-        private async Task<IEnumerable<HtmlNode>> GetAlbumNodesAsync(long bandId)
+        private async Task<IEnumerable<HtmlNode>> GetAlbumNodesAsync(string bandId)
         {
             var albumUrl = string.Format(_config.GetConfig("AlbumUrl"), bandId);
             var rawCode = await new HtmlWeb().LoadFromWebAsync(albumUrl);
@@ -211,10 +204,15 @@ namespace MetalScraper
                 return null;
             }
             var albumNodes = tableNodes
-                .Where(n => Enum.GetNames(typeof(AlbumType)).Contains(n.SelectNodes("td")[1]?.InnerText.Replace("-", "").Replace(" ", "").Trim()))
+                .Where(n => albumTypes.Contains(n.SelectNodes("td")[1]?.InnerText.Replace("-", "").Replace(" ", "").Trim()))
                 .ToList();
 
             return albumNodes;
+        }
+
+        private async Task InitializeAsync()
+        {
+            albumTypes = Enum.GetNames(typeof(AlbumType));
         }
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MetalScraper.Contracts;
 using Microsoft.Extensions.Configuration;
 using MetalModels;
+using ConfigurationManager = System.Configuration.ConfigurationManager;
 
 var services = new ServiceCollection();
 ConfigureServices(services);
@@ -16,5 +17,5 @@ static void ConfigureServices(IServiceCollection services)
     services.AddSingleton(config);
     services.AddSingleton<IConfigHandler, ConfigHandler>();
     services.AddSingleton<Scraper, Scraper>();
-    services.AddDbContext<MetalDbContext>();
+    services.AddSingleton(new MetalDbContext("Server=tcp:metal-database.database.windows.net,1433;Initial Catalog=MetalDatabase;Persist Security Info=False;User ID=metal-db-user;Password=b4jn0vJXON1my4XU;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"));
 }

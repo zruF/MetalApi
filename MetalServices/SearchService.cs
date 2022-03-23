@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using MetalModels;
+using MetalModels.Contracts;
 using MetalServices.Contracts;
+using MetalServices.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Shared.Dtos.Requests;
 using Shared.Dtos.Responses;
@@ -22,13 +24,18 @@ namespace MetalServices
         {
             var entities = new List<SearchResponse>();
 
-            var bands = await _dbContext.Bands.AsNoTracking().Where(b => b.Name.Contains(filter.Name)).ToListAsync();
-            var albums = await _dbContext.Albums.AsNoTracking().Where(b => b.Name.Contains(filter.Name)).ToListAsync();
-            var songs = await _dbContext.Songs.AsNoTracking().Where(b => b.Name.Contains(filter.Name)).ToListAsync();
+            IEnumerable<IEntity> bands, albums, songs;
 
-            entities.AddRange(_mapper.Map<IEnumerable<SearchResponse>>(bands));
-            entities.AddRange(_mapper.Map<IEnumerable<SearchResponse>>(albums));
-            entities.AddRange(_mapper.Map<IEnumerable<SearchResponse>>(songs));
+            if(filter.EntityType == MetalModels.Types.EntityType.All || filter.EntityType == MetalModels.Types.EntityType.Band)
+            {
+                bands = await _dbContext.Bands.AsNoTracking().SetQueryFilter(filter).ToListAsync();
+                entities.AddRange(_mapper.Map<IEnumerable<SearchResponse>>(bands));
+            }
+            if (filter.EntityType == MetalModels.Types.EntityType.All || filter.EntityType == MetalModels.Types.EntityType.Album)
+            {
+                albums = await _dbContext.Albums.AsNoTracking().SetQueryFilter(filter).ToListAsync();
+                entities.AddRange(_mapper.Map<IEnumerable<SearchResponse>>(albums));
+            }
 
             return entities;
         }

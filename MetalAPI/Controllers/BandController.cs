@@ -21,5 +21,21 @@ namespace MetalAPI.Controllers
             var band = await _bandService.GetBandAsync(bandId);
             return Ok(band);
         }
+
+        [HttpPut("Favorite")]
+        [ProducesResponseType(typeof(BandResponse), StatusCodes.Status200OK)]
+        public async Task<IActionResult> SetFavorite(Guid bandId)
+        {
+            var band = await _bandService.SetFavoriteAsync(bandId);
+            return Ok(band);
+        }
+
+        [HttpPut("Unfavorite")]
+        [ProducesResponseType(typeof(BandResponse), StatusCodes.Status200OK)]
+        public async Task<IActionResult> SetUnfavorite(Guid bandId)
+        {
+            var band = await _bandService.SetUnfavoriteAsync(bandId);
+            return Ok(band);
+        }
     }
 }

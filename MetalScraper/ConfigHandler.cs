@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace MetalScraper
 {
-    internal class ConfigHandler : IConfigHandler
+    public class ConfigHandler : IConfigHandler
     {
         public IConfiguration _configuration;
 

@@ -7,7 +7,6 @@ namespace MetalModels.Contracts
     {
         DbSet<Band> Bands { get; set; }
         DbSet<Album> Albums { get; set; }
-        DbSet<Song> Songs { get; set; }
         DbSet<Genre> Genres { get; set; }
         DbSet<BandGenre> BandGenres { get; set; }
     }

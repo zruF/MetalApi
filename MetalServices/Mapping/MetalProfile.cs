@@ -14,16 +14,12 @@ namespace MetalServices.Mapping
 
             CreateMap<Album, AlbumResponse>();
 
-            CreateMap<Song, SongResponse>();
 
             CreateMap<Band, SearchResponse>()
                 .ForMember(dest => dest.EntityType, opt => opt.MapFrom(src => EntityType.Band.ToString()));
 
             CreateMap<Album, SearchResponse>()
                 .ForMember(dest => dest.EntityType, opt => opt.MapFrom(src => EntityType.Album.ToString()));
-
-            CreateMap<Song, SearchResponse>()
-                .ForMember(dest => dest.EntityType, opt => opt.MapFrom(src => EntityType.Song.ToString()));
         }
     }
 }

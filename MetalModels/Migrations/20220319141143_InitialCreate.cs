@@ -5,21 +5,23 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace MetalModels.Migrations
 {
+    /// <inheritdoc />
     public partial class InitialCreate : Migration
     {
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
                 name: "Bands",
                 columns: table => new
                 {
-                    BandId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: true),
-                    Country = table.Column<string>(type: "TEXT", nullable: true),
-                    ShortId = table.Column<long>(type: "INTEGER", nullable: false),
-                    FoundingYear = table.Column<int>(type: "INTEGER", nullable: false),
-                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
-                    IsFavorite = table.Column<bool>(type: "INTEGER", nullable: false)
+                    BandId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Country = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ShortId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FoundingYear = table.Column<int>(type: "int", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    IsFavorite = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -30,8 +32,8 @@ namespace MetalModels.Migrations
                 name: "Genres",
                 columns: table => new
                 {
-                    GenreId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: true)
+                    GenreId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -42,11 +44,11 @@ namespace MetalModels.Migrations
                 name: "Albums",
                 columns: table => new
                 {
-                    AlbumId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: true),
-                    BandId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    ReleaseYear = table.Column<int>(type: "INTEGER", nullable: false),
-                    AlbumType = table.Column<int>(type: "INTEGER", nullable: false)
+                    AlbumId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    BandId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ReleaseYear = table.Column<int>(type: "int", nullable: false),
+                    AlbumType = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -63,8 +65,8 @@ namespace MetalModels.Migrations
                 name: "BandGenres",
                 columns: table => new
                 {
-                    BandId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    GenreId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    BandId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    GenreId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -83,26 +85,6 @@ namespace MetalModels.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Songs",
-                columns: table => new
-                {
-                    SongId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    AlbumId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: true),
-                    Length = table.Column<string>(type: "TEXT", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Songs", x => x.SongId);
-                    table.ForeignKey(
-                        name: "FK_Songs_Albums_AlbumId",
-                        column: x => x.AlbumId,
-                        principalTable: "Albums",
-                        principalColumn: "AlbumId",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_Albums_BandId",
                 table: "Albums",
@@ -112,29 +94,22 @@ namespace MetalModels.Migrations
                 name: "IX_BandGenres_GenreId",
                 table: "BandGenres",
                 column: "GenreId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Songs_AlbumId",
-                table: "Songs",
-                column: "AlbumId");
         }
 
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "BandGenres");
-
-            migrationBuilder.DropTable(
-                name: "Songs");
-
-            migrationBuilder.DropTable(
-                name: "Genres");
-
             migrationBuilder.DropTable(
                 name: "Albums");
 
             migrationBuilder.DropTable(
+                name: "BandGenres");
+
+            migrationBuilder.DropTable(
                 name: "Bands");
+
+            migrationBuilder.DropTable(
+                name: "Genres");
         }
     }
 }

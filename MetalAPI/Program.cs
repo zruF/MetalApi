@@ -4,6 +4,7 @@ using MetalModels;
 using MetalServices;
 using MetalServices.Contracts;
 using MetalServices.Mapping;
+using ConfigurationManager = System.Configuration.ConfigurationManager;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +34,7 @@ static void ConfigureServices(IServiceCollection services)
 {
     IConfiguration config = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json").Build();
     services.AddSingleton(config);
-    services.AddDbContext<MetalDbContext>();
+    services.AddSingleton(new MetalDbContext(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString));
     services.AddTransient<IBandService, BandService>();
     services.AddTransient<IAlbumService, AlbumService>();
     services.AddTransient<ISearchService, SearchService>();

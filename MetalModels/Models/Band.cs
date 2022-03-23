@@ -9,11 +9,12 @@ namespace MetalModels.Models
         public Guid BandId { get; set; }
         public string Name { get; set; }
         public string Country { get; set; }
-        public long ShortId { get; set; }
+        public string ShortId { get; set; }
         public int FoundingYear { get; set; }
         public bool IsActive { get; set; }
-        public bool IsFavorite { get; set; }
+        public string ImgUrl { get; set; }
         public IEnumerable<Album> Albums { get; set; }
+        public virtual ICollection<BandFavorites> Favorites { get; set; }
         public virtual ICollection<BandGenre> BandGenres { get; set; }
     }
 }

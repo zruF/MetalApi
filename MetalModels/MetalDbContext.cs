@@ -5,33 +5,42 @@ namespace MetalModels
 {
     public class MetalDbContext : DbContext
     {
-        private string DbPath { get; set; }
-
+        private readonly string _connectionString;
         public MetalDbContext()
         {
-            var folder = Environment.SpecialFolder.LocalApplicationData;
-            var path = Environment.GetFolderPath(folder);
-            DbPath = Path.Join(path, "metal.db");
+        }
+
+        public MetalDbContext(string connectionString)
+        {
+            _connectionString = connectionString;
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            /*
+             * Server=tcp:metal-database.database.windows.net,1433;Initial Catalog=MetalDatabase;Persist Security Info=False;User ID=metal-db-user;Password=b4jn0vJXON1my4XU;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+             * */
+            optionsBuilder.UseSqlServer("Server=tcp:metal-database.database.windows.net,1433;Initial Catalog=MetalDatabase;Persist Security Info=False;User ID=metal-db-user;Password=b4jn0vJXON1my4XU;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Band>().HasMany(e => e.Albums).WithOne().HasForeignKey(a => a.BandId);
-            modelBuilder.Entity<Album>().HasMany(e => e.Songs).WithOne().HasForeignKey(s => s.AlbumId);
             modelBuilder.Entity<BandGenre>().HasKey(e => new { e.BandId, e.GenreId });
             modelBuilder.Entity<BandGenre>().HasOne(bg => bg.Band).WithMany(b => b.BandGenres).HasForeignKey(bg => bg.GenreId);
             modelBuilder.Entity<BandGenre>().HasOne(bg => bg.Genre).WithMany(b => b.BandGenres).HasForeignKey(bg => bg.BandId);
-        }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder options)
-        {
-            options.UseSqlite($"Data Source={DbPath}");
-            options.EnableSensitiveDataLogging();
+            modelBuilder.Entity<BandFavorites>().HasKey(e => new { e.UserId, e.BandId });
+            modelBuilder.Entity<BandFavorites>().HasOne(bg => bg.User).WithMany(b => b.BandFavorites).HasForeignKey(bg => bg.BandId);
+            modelBuilder.Entity<BandFavorites>().HasOne(bg => bg.Band).WithMany(b => b.Favorites).HasForeignKey(bg => bg.UserId);
+
+            modelBuilder.Entity<GenreFavorites>().HasKey(e => new { e.UserId, e.GenreId });
+            modelBuilder.Entity<GenreFavorites>().HasOne(bg => bg.User).WithMany(b => b.GenreFavorites).HasForeignKey(bg => bg.GenreId);
+            modelBuilder.Entity<GenreFavorites>().HasOne(bg => bg.Genre).WithMany(b => b.Favorites).HasForeignKey(bg => bg.UserId);
         }
 
         public DbSet<Band> Bands { get; set; }
         public DbSet<Album> Albums { get; set; }
-        public DbSet<Song> Songs { get; set; }
         public DbSet<Genre> Genres { get; set; }
         public DbSet<BandGenre> BandGenres { get; set; }
     }
