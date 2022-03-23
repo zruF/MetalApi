@@ -1,6 +1,0 @@
-<resources>
-    <string name="app_name">MetalBase</string>
-    <string name="title_upcomingAlbums">Upcoming</string>
-    <string name="title_favorites">Favorites</string>
-    <string name="title_search">Search</string>
-</resources>

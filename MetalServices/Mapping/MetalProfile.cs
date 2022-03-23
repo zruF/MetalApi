@@ -19,6 +19,8 @@ namespace MetalServices.Mapping
 
             CreateMap<Album, AlbumResponse>();
 
+            CreateMap<User, UserResponse>();
+
             CreateMap<Band, SearchResponse>()
                 .ForMember(dest => dest.EntityType, opt => opt.MapFrom(src => EntityType.Band.ToString()));
 

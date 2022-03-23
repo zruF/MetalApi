@@ -39,6 +39,7 @@ static void ConfigureServices(IServiceCollection services)
     services.AddTransient<IAlbumService, AlbumService>();
     services.AddTransient<IGenreService, GenreService>();
     services.AddTransient<ISearchService, SearchService>();
+    services.AddTransient<IUserService, UserService>();
     var mapperConfig = new MapperConfiguration(mc =>
     {
         mc.AddProfile(new MetalProfile());
