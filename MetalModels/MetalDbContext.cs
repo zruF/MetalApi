@@ -44,6 +44,6 @@ namespace MetalModels
         public DbSet<Album> Albums { get; set; }
         public DbSet<Genre> Genres { get; set; }
         public DbSet<BandGenre> BandGenres { get; set; }
-        public DbSet<User> Users { get; set; }
+        public DbSet<User> User { get; set; }
     }
 }

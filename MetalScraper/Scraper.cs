@@ -141,7 +141,7 @@ namespace MetalScraper
                     AlbumType = (AlbumType)Enum.Parse(typeof(AlbumType), childs[1].InnerText.Replace("-", "").Replace(" ", "").Trim()),
                     ReleaseDate = albumInfos[1].InnerText.ParseDate(),
                     ImgUrl = imgUrl,
-                }); ;
+                });
             }
 
             return albums;

@@ -15,7 +15,7 @@ namespace MetalAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateNewUser(UserRequest request)
+        public async Task<IActionResult> CreateNewUser([FromBody] UserRequest request)
         {
             var user = await _userService.CreateNewUser(request);
             return Ok(user);

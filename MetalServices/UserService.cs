@@ -20,7 +20,7 @@ namespace MetalServices
 
         public async Task<UserResponse> CreateNewUser(UserRequest request)
         {
-            var existingUser = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == request.Id);
+            var existingUser = await _dbContext.User.FirstOrDefaultAsync(u => u.Id == request.Id);
 
             if (existingUser == null)
             {
@@ -32,7 +32,9 @@ namespace MetalServices
                     Smartphone = request.Smartphone
                 };
 
-                await _dbContext.Users.AddAsync(existingUser);
+                await _dbContext.User.AddAsync(existingUser);
+
+                await _dbContext.SaveChangesAsync();
             }
 
             var userResponse = _mapper.Map<UserResponse>(existingUser);
