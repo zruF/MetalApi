@@ -63,7 +63,7 @@ namespace MetalServices
 
             var albumResponse = _mapper.Map<IEnumerable<AlbumResponse>>(orderedAlbums);
 
-            return new PaginationResponse<AlbumResponse>(albumResponse, albums.Count(), albums.Count(), 1, 100);
+            return new PaginationResponse<AlbumResponse>(albumResponse, albums.Count(), albums.Count(), 1, 20);
         }
     }
 }
